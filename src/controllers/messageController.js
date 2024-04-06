@@ -6,13 +6,11 @@ let createMessage = async (req, res) => {
     let idReceive = req.body.idReceive;
     let isGroup = req.body.isGroup;
     let type = req.body.type;
-    console.log('=======================');
-    console.log(idSend,content,idReceive,isGroup,type)
     if (req.file) {
         console.log(req.file);
         content = req.file
     }
-    if (!idSend || !idReceive || !isGroup || !type) {
+    if (!idSend || !idReceive || !type) {
         return res.status(400).send({
             errCode: 1,
             errMessage: "missingparammeter"
