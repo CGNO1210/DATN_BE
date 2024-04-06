@@ -1,0 +1,9 @@
+.container{
+    width: 40%;
+}
+.container h2{
+    text-align: center;
+}
+.btn_rgt{
+    float: right;
+}

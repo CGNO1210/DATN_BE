@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="temp.css">
+</head>
+
+<body>
+    <div class='wrapper'>
+        <div class='left'>
+            <div class='left_header'>
+                <div class='left_nav'>
+                    <h3>Đoạn chat</h3>
+                </div>
+            </div>
+            <!-- các user -->
+            <div class='left_content'>
+                <div class="title">Users Online:</div>
+                <div class="room_chat">
+                    <div class="user">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Unknown_person.jpg/813px-Unknown_person.jpg"
+                            alt="" />
+                        <div class="username">Ngoc</div>
+                    </div>
+                </div>
+                <div class="title">Users offline:</div>
+                <div class="offline">
+                    <div class="user">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Unknown_person.jpg/813px-Unknown_person.jpg"
+                            alt="" />
+                        <div class="username">Ngoc</div>
+                    </div>
+                </div>
+            </div>
+            <!--  -->
+            <div class='left_footer'>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Unknown_person.jpg/813px-Unknown_person.jpg"
+                    alt="" />
+                <div class='left_user'>Left User</div>
+                <div class='left_logout'>
+                    <button class="btn_logout">Đăng Xuất</button>
+                </div>
+            </div>
+        </div>
+        <div class='right'>
+            <!-- tên doạn chat -->
+            <div class='right_header'>
+                <h3 class="nameChat">ABC name</h3>
+            </div>
+            <!-- nội dung chat -->
+            <div class='right_content chatbox'>
+
+                <div class='block send'>
+                    <div class="message">
+                        send
+                    </div>
+                </div>
+                <div class='block receive'>
+                    <div class="message">
+                        receive
+                    </div>
+                </div>
+            </div>
+            <!-- gửi tin nhắn -->
+            <div class='right_footer'>
+                <input class='chat' type="text" placeholder='Send message' />
+                <button type='button' id='btn'>Send</button>
+            </div>
+        </div>
+    </div>
+    <!-- <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.js"></script> -->
+</body>
+
+</html>
