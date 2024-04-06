@@ -6,17 +6,17 @@ import { generateToken, verifyToken } from '../helpers/jwt.helper';
 import e from 'cors';
 const debug = console.log.bind(console);
 let tokenList = {};
-const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || '7d';
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || 'refresh-token-secret-example--green-cat-a@';
+const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE || '3650d';
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || 'refresh-token-secret-example--green-cat-a@';
 
 require('dotenv').config();
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
-    cloud_name: process.env.CLOUND_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+    cloud_name: process.env.CLOUND_NAME || 'dsvacsceu',
+    api_key: process.env.API_KEY || '985563361639596',
+    api_secret: process.env.API_SECRET || '5HLvQ7zYAabvuTbNi03uzLuU1EM',
     secure: true
 });
 
