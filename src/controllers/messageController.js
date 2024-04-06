@@ -6,8 +6,8 @@ let createMessage = async (req, res) => {
     let idReceive = req.body.idReceive;
     let isGroup = req.body.isGroup;
     let type = req.body.type;
-    // console.log('=======================');
-    // console.log(idSend,content,idReceive,isGroup,type)
+    console.log('=======================');
+    console.log(idSend,content,idReceive,isGroup,type)
     if (req.file) {
         console.log(req.file);
         content = req.file
