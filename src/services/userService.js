@@ -81,11 +81,11 @@ let compareUserPassword = (email, password) => {
                 if (check) {
 
                     //set online
-                    await db.User.update({
-                        isOnline: 1,
-                    }, {
-                        where: { id: user.id }
-                    })
+                    // await db.User.update({
+                    //     isOnline: 1,
+                    // }, {
+                    //     where: { id: user.id }
+                    // })
                     userData.errCode = 0
                     userData.errMessage = 'Ok'
                     delete user.password
