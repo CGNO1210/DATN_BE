@@ -137,22 +137,30 @@ let getAllUser = (id, currentId) => {
                     attributes: {
                         exclude: ['password']
                     },
+                    raw: true
                 })
-                users = users.map(async (user) => {
+                for (let i = 0; i < users.length; i++) {
                     let messages = await db.Message.findOne({
                         where: {
                             [Sequelize.Op.or]: [
-                                { idSend: currentId, idReceive: user.id },
-                                { idSend: user.id, idReceive: currentId }
+                                { idSend: currentId, idReceive: users[i].id },
+                                { idSend: users[i].id, idReceive: currentId }
                             ],
                             isGroup: 0
                         },
-                        order: [['createdAt', 'DESC']] // Sắp xếp theo thời gian tạo
+                        order: [['createdAt', 'DESC']], // Sắp xếp theo thời gian tạo
+                        raw: true
                     });
-                    user.lasttMessages = messages.content || ''
-                    user.lasttMessagesTime = messages.createAt || ''
-                    return user
-                })
+                    if (messages !== null) {
+                        users[i].lasttMessages = messages.content
+                        users[i].lastMessagesTime = messages.createdAt
+                    } else {
+                        users[i].lasttMessages = ''
+                        users[i].lastMessagesTime = ''
+                    }
+
+                }
+
             }
             if (id && id !== 'ALL') {
                 users = await db.User.findOne({
@@ -162,6 +170,7 @@ let getAllUser = (id, currentId) => {
                     }
                 })
             }
+            // console.log(users);
             resolve(users)
         } catch (error) {
             reject(error)
