@@ -152,9 +152,21 @@ let getAllUser = (id, currentId) => {
                         raw: true
                     });
                     if (messages !== null) {
-                        users[i].lastMessages = messages.content
                         users[i].lastMessagesTime = messages.createdAt
                         users[i].nameSend = messages.idSend == currentId ? "Bạn" : users[i].nameUser
+                        switch (messages.type) {
+                            case 'text':
+                                users[i].lastMessages = messages.content
+                                break;
+                            case 'img':
+                                users[i].lastMessages = 'Đã gửi 1 ảnh'
+                                break;
+                            case 'img':
+                                users[i].lastMessages = 'Đã gửi 1 video'
+                                break;
+                            default:
+                                break;
+                        }
                     } else {
                         users[i].lastMessages = ''
                     }
