@@ -3,9 +3,9 @@ import { Sequelize } from 'sequelize';
 require('dotenv').config();
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
-    cloud_name: process.env.CLOUND_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+    cloud_name: process.env.CLOUND_NAME || 'dsvacsceu',
+    api_key: process.env.API_KEY || '985563361639596',
+    api_secret: process.env.API_SECRET || '5HLvQ7zYAabvuTbNi03uzLuU1EM',
     secure: true
 });
 
@@ -29,8 +29,8 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
                             errMessage: 'not upload img'
                         })
                     }
-                    else{
-                        save_cotent=rs.secure_url;
+                    else {
+                        save_cotent = rs.secure_url;
                     }
                     break;
                 case 'img':
@@ -47,8 +47,8 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
                             errMessage: 'not upload video'
                         })
                     }
-                    else{
-                        save_cotent=rs.secure_url;
+                    else {
+                        save_cotent = rs.secure_url;
                     }
                     break;
 
