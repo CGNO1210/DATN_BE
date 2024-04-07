@@ -137,7 +137,7 @@ let getAllUser = (id, currentId) => {
                         exclude: ['password']
                     },
                 })
-                users.map(async (user) => {
+                users = users.map(async (user) => {
                     let messages = await db.Message.findOne({
                         where: {
                             [Sequelize.Op.or]: [
@@ -150,6 +150,7 @@ let getAllUser = (id, currentId) => {
                     });
                     user.lasttMessages = messages.content || ''
                     user.lasttMessagesTime = messages.createAt || ''
+                    return user
                 })
             }
             if (id && id !== 'ALL') {
