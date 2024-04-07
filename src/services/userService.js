@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 const salt = bcrypt.genSaltSync(10)
 require('dotenv').config();
 import { generateToken, verifyToken } from '../helpers/jwt.helper';
+import { Sequelize } from 'sequelize';
 import e from 'cors';
 const debug = console.log.bind(console);
 let tokenList = {};
