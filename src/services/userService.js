@@ -126,7 +126,7 @@ let checkUserEmail = (email) => {
     })
 }
 
-let getAllUser = (id) => {
+let getAllUser = (id, currentId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = ''
@@ -136,6 +136,20 @@ let getAllUser = (id) => {
                     attributes: {
                         exclude: ['password']
                     },
+                })
+                users.map(async (user) => {
+                    let messages = await db.Message.findOne({
+                        where: {
+                            [Sequelize.Op.or]: [
+                                { idSend: currentId, idReceive: user.id },
+                                { idSend: user.id, idReceive: currentId }
+                            ],
+                            isGroup: 0
+                        },
+                        order: [['createdAt', 'DESC']] // Sắp xếp theo thời gian tạo
+                    });
+                    user.lasttMessages = messages.content || ''
+                    user.lasttMessagesTime = messages.createAt || ''
                 })
             }
             if (id && id !== 'ALL') {
