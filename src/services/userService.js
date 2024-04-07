@@ -152,11 +152,11 @@ let getAllUser = (id, currentId) => {
                         raw: true
                     });
                     if (messages !== null) {
-                        users[i].lasttMessages = messages.content
+                        users[i].lastMessages = messages.content
                         users[i].lastMessagesTime = messages.createdAt
+                        users[i].nameSend = messages.idSend == currentId ? "Bạn" : users[i].nameUser
                     } else {
-                        users[i].lasttMessages = ''
-                        users[i].lastMessagesTime = ''
+                        users[i].lastMessages = ''
                     }
 
                 }
