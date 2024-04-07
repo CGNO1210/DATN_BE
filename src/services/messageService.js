@@ -31,9 +31,20 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
                     }
                     else {
                         save_cotent = rs.secure_url;
+                        await db.Message.create({
+                            idSend,
+                            content: save_cotent,
+                            idReceive,
+                            isGroup,
+                            type
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Create message successfully!!'
+                        })
                     }
                     break;
-                case 'img':
+                case 'video':
                     const videoData = content.buffer.toString('base64');
                     rs = await cloudinary.uploader.upload(`data:${video.mimetype};base64,${videoData}`)
                         .then(result => result)
@@ -49,6 +60,17 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
                     }
                     else {
                         save_cotent = rs.secure_url;
+                        await db.Message.create({
+                            idSend,
+                            content: save_cotent,
+                            idReceive,
+                            isGroup,
+                            type
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Create message successfully!!'
+                        })
                     }
                     break;
 
@@ -56,17 +78,8 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
                     break;
             }
 
-            await db.Message.create({
-                idSend,
-                content: save_cotent,
-                idReceive,
-                isGroup,
-                type
-            })
-            resolve({
-                errCode: 0,
-                errMessage: 'Create message successfully!!'
-            })
+
+
         } catch (error) {
             reject(error)
         }
