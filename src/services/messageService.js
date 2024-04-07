@@ -17,7 +17,7 @@ let createMessage = (idSend, content, idReceive, isGroup, type) => {
             switch (type) {
                 case 'img':
                     const imageData = content.buffer.toString('base64');
-                    rs = await cloudinary.uploader.upload(`data:${img.mimetype};base64,${imageData}`)
+                    rs = await cloudinary.uploader.upload(`data:${content.mimetype};base64,${imageData}`)
                         .then(result => result)
                         .catch(error => {
                             console.log(error)
