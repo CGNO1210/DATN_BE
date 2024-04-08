@@ -18,7 +18,7 @@ let initWebRoutes = (app) => {
     //auth
     //router.use(AuthMiddleWare.isAuth)
     router.get('/api/getAllUser', userController.handleGetAllUser)
-    router.post('/api/createMessage', upload.single('file'), messageController.createMessage)
+    router.post('/api/createMessage', messageController.createMessage)
     router.get('/api/getMessagesPrivate', messageController.getMessageByUser1AndUser2)
     router.get('/api/getMessagesGroup', messageController.getMessageByGroup)
     router.post('/api/createGroup', groupController.createGroup)
