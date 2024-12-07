@@ -1,10 +1,11 @@
 {
   "development": {
-    "username": "usapp5gumjb07aok",
-    "password": "TMiEA09581y4ohfK01D6",
-    "database": "bihljpjimepuk9ie7yeh",
-    "host": "bihljpjimepuk9ie7yeh-mysql.services.clever-cloud.com",
-    "dialect": "mysql"
+    "username": "root",
+    "password": "",
+    "database": "chatapp",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
   },
   "test": {
     "username": "usapp5gumjb07aok",

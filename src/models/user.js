@@ -24,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     isOnline: {
       type: DataTypes.BOOLEAN,
       defaultValue: 0
-    }
+    },
+    socketId: {
+      type: DataTypes.STRING,
+      defaultValue: ''
+    },
+    device: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

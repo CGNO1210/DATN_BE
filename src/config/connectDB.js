@@ -15,11 +15,15 @@ import { Sequelize } from 'sequelize';
 
 require('dotenv').config();
 
-const sequelize = new Sequelize(process.env.DB_DATABASE || 'bihljpjimepuk9ie7yeh', process.env.DB_USERNAME || 'usapp5gumjb07aok', process.env.DB_PASSWORD || 'TMiEA09581y4ohfK01D6', {
-  host: process.env.DB_HOST || 'bihljpjimepuk9ie7yeh-mysql.services.clever-cloud.com',
-  dialect: 'mysql',
-  logging: false
-});
+const sequelize = new Sequelize(process.env.DB_DATABASE || 'bihljpjimepuk9ie7yeh',
+  process.env.DB_USERNAME || 'usapp5gumjb07aok',
+  // process.env.DB_PASSWORD || 'TMiEA09581y4ohfK01D6',
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST || 'bihljpjimepuk9ie7yeh-mysql.services.clever-cloud.com',
+    dialect: 'mysql',
+    logging: false
+  });
 
 let connectDB = async () => {
   try {

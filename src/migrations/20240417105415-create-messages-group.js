@@ -2,35 +2,26 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('MessagesGroups', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      nameUser: {
+      idSend: {
+        type: Sequelize.INTEGER
+      },
+      idReceive: {
+        type: Sequelize.INTEGER
+      },
+      content: {
         type: Sequelize.STRING
       },
-      avatar: {
-        type: Sequelize.STRING,
-        defaultValue: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Unknown_person.jpg/813px-Unknown_person.jpg'
+      isGroup: {
+        type: Sequelize.BOOLEAN
       },
-      email: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      isOnline: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: 0
-      },
-      socketId: {
-        type: Sequelize.STRING,
-        defaultValue: ''
-      },
-      device: {
+      type: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -44,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('MessagesGroups');
   }
 };

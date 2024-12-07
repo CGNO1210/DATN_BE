@@ -12,8 +12,13 @@ let createMessage = async (req, res) => {
             errMessage: "missingparammeter"
         })
     } else {
-        let message = await messageService.createMessage(idSend, content, idReceive, isGroup, type)
-        return res.status(200).json(message)
+        if (!isGroup) {
+            let message = await messageService.createMessage(idSend, content, idReceive, isGroup, type)
+            return res.status(200).json(message)
+        } else {
+            let messageGroup = await messageService.createMessageGroup(idSend, content, idReceive, isGroup, type)
+            return res.status(200).json(messageGroup)
+        }
     }
 }
 
@@ -32,14 +37,22 @@ let getMessageByUser1AndUser2 = async (req, res) => {
 }
 let getMessageByGroup = async (req, res) => {
     let groupId = req.query.groupId
-    console.log(groupId);
     if (groupId) {
         let message = await messageService.getMessageByGroup(groupId);
+        return res.status(200).json(message)
+    }
+}
+let deleteMessage = async (req, res) => {
+    let id = req.query.id
+    let isGroup = req.query.isGroup
+    if (id) {
+        let message = await messageService.deleteMessage(id, isGroup);
         return res.status(200).json(message)
     }
 }
 export default {
     createMessage,
     getMessageByUser1AndUser2,
-    getMessageByGroup
+    getMessageByGroup,
+    deleteMessage
 }

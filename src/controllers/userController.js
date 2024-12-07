@@ -31,7 +31,16 @@ let handleGetAllUser = async (req, res) => {
             users: []
         })
     }
-    let users = await userService.getAllUser(id,currentId)
+    let users = await userService.getAllUser(id, currentId)
+    return res.status(200).json({
+        errCode: 0,
+        errMessage: 'OK',
+        users
+    })
+}
+let handleGetOnlyAllUser = async (req, res) => {
+    let currentId = req.query.currentId //ALL,id
+    let users = await userService.getOnlyAllUser(currentId)
     return res.status(200).json({
         errCode: 0,
         errMessage: 'OK',
@@ -40,13 +49,23 @@ let handleGetAllUser = async (req, res) => {
 }
 
 let handleCreateNewUser = async (req, res) => {
-    let message = await userService.createNewUser(req.body, req.file)
+    let message = await userService.createNewUser(req.body)
+    return res.status(200).json(message)
+}
+let upvideo = async (req, res) => {
+    // console.log(req.file)
+    let message = await userService.upvideo(req.file)
     return res.status(200).json(message)
 }
 
 let handleEditUser = async (req, res) => {
     let data = req.body
     let message = await userService.updateUserData(data)
+    return res.status(200).json(message)
+}
+let handleEditGroup = async (req, res) => {
+    let data = req.body
+    let message = await userService.updateGroupData(data)
     return res.status(200).json(message)
 }
 
@@ -112,4 +131,7 @@ export default {
     handleDeleteUser,
     refreshToken,
     registerCourse,
+    handleGetOnlyAllUser,
+    upvideo,
+    handleEditGroup
 };

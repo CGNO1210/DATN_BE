@@ -13,7 +13,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatarGroup: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://history-day-by-day.com/wp-content/uploads/2016/12/ruga.jpg'
       },
       ownGroup: {
         type: Sequelize.INTEGER

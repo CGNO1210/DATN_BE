@@ -16,13 +16,23 @@ let initWebRoutes = (app) => {
     router.post("/refeshToken", userController.refreshToken)
     router.post("/api/createNewUser", userController.handleCreateNewUser)
     //auth
-    //router.use(AuthMiddleWare.isAuth)
+    // router.use(AuthMiddleWare.isAuth)
     router.get('/api/getAllUser', userController.handleGetAllUser)
+    router.get('/api/GetOnlyAllUser', userController.handleGetOnlyAllUser)
+    router.post('/api/editUser', userController.handleEditUser)
+    router.post('/api/editGroup', userController.handleEditGroup)
     router.post('/api/createMessage', messageController.createMessage)
     router.get('/api/getMessagesPrivate', messageController.getMessageByUser1AndUser2)
     router.get('/api/getMessagesGroup', messageController.getMessageByGroup)
+    router.delete('/api/deleteMessage', messageController.deleteMessage)
     router.post('/api/createGroup', groupController.createGroup)
-    router.post('/api/joinGroup', groupController.joinGroup)
+    router.post('/api/addMemberGroup', groupController.addMemberGroup)
+    router.post('/api/deleteMemberGroup', groupController.deleteMemberGroup)
+    router.get('/api/getGroupById', groupController.getGroupById)
+    router.get('/api/getGroupsByIdUser', groupController.getGroupsByIdUser)
+    router.get('/api/getMembersGroup', groupController.getMembersGroup)
+    router.get('/api/getMemberNotInGroup', groupController.getMemberNotInGroup)
+    router.post("/api/upvideo", upload.single('video'), userController.upvideo)
     // router.get("/test", (req, res) => {
     //     return res.status(200).json({
     //         errCode: 0,

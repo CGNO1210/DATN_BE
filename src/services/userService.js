@@ -3,8 +3,8 @@ import bcrypt from 'bcrypt';
 const salt = bcrypt.genSaltSync(10)
 require('dotenv').config();
 import { generateToken, verifyToken } from '../helpers/jwt.helper';
-import { Sequelize } from 'sequelize';
-import e from 'cors';
+import { Sequelize, Op, where } from 'sequelize';
+import { raw } from 'body-parser';
 const debug = console.log.bind(console);
 let tokenList = {};
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || '7d';
@@ -131,15 +131,30 @@ let getAllUser = (id, currentId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = ''
+            let userGroups = ''
             id = id.toUpperCase()
             if (id === 'ALL') {
                 users = await db.User.findAll({
+                    where: {
+                        id: {
+                            [Op.ne]: currentId // Tìm tất cả các id không bằng userIdToExclude
+                        }
+                    },
                     attributes: {
                         exclude: ['password']
                     },
                     raw: true
                 })
+
+                userGroups = await db.UserGroup.findAll({
+                    where: {
+                        idUser: currentId
+                    },
+                    raw: true
+                })
+
                 for (let i = 0; i < users.length; i++) {
+                    users[i].isGroup = 0
                     let messages = await db.Message.findOne({
                         where: {
                             [Sequelize.Op.or]: [
@@ -161,7 +176,7 @@ let getAllUser = (id, currentId) => {
                             case 'img':
                                 users[i].lastMessages = 'Đã gửi 1 ảnh'
                                 break;
-                            case 'img':
+                            case 'video':
                                 users[i].lastMessages = 'Đã gửi 1 video'
                                 break;
                             default:
@@ -169,10 +184,64 @@ let getAllUser = (id, currentId) => {
                         }
                     } else {
                         users[i].lastMessages = ''
+                        users[i].lastMessagesTime = 0
                     }
-
                 }
 
+                for (let i = 0; i < userGroups.length; i++) {
+                    let messages = await db.MessagesGroup.findOne({
+                        where: {
+                            idReceive: userGroups[i].idGroup,
+                            isGroup: 1
+                        },
+                        order: [['createdAt', 'DESC']], // Sắp xếp theo thời gian tạo
+                        raw: true
+                    });
+                    let group = await db.Group.findOne({
+                        where: {
+                            id: userGroups[i].idGroup
+                        },
+                        raw: true
+                    })
+                    group.nameUser = group.nameGroup
+                    group.avatar = group.avatarGroup
+                    group.isGroup = 1
+                    if (messages !== null) {
+
+
+                        let nameUser = await db.User.findOne({
+                            where: {
+                                id: messages.idSend
+                            },
+                            raw: true
+                        })
+                        group.lastMessagesTime = messages.createdAt
+                        group.nameSend = messages.idSend == currentId ? "Bạn" : nameUser.nameUser
+                        switch (messages.type) {
+                            case 'text':
+                                group.lastMessages = messages.content
+                                break;
+                            case 'img':
+                                group.lastMessages = 'Đã gửi 1 ảnh'
+                                break;
+                            case 'video':
+                                group.lastMessages = 'Đã gửi 1 video'
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        group.lastMessages = ''
+                        group.lastMessagesTime = 0
+                    }
+                    users.push(group);
+                }
+
+                users = users.sort((a, b) => {
+                    const timeA = new Date(a.lastMessagesTime).getTime() || 0;
+                    const timeB = new Date(b.lastMessagesTime).getTime() || 0;
+                    return timeB - timeA
+                })
             }
             if (id && id !== 'ALL') {
                 users = await db.User.findOne({
@@ -190,38 +259,55 @@ let getAllUser = (id, currentId) => {
     })
 }
 
-let createNewUser = (data, img) => {
+let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!img) {
-                let check = await checkUserEmail(data.email)
-                if (check === true) {
-                    resolve({
-                        errCode: 1,
-                        errMessage: "email is already in used please try another email!"
-                    })
-                } else {
-                    let hashPasswordFromBcrypt = await hashUserPassword(data.password)
+            let check = await checkUserEmail(data.email)
+            if (check === true) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "email is already in used please try another email!"
+                })
+            } else {
+                let hashPasswordFromBcrypt = await hashUserPassword(data.password)
+                if (!data.img) {
                     await db.User.create({
                         email: data.email,
                         password: hashPasswordFromBcrypt,
                         nameUser: data.nameUser,
                     })
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'OK'
+                } else {
+                    await db.User.create({
+                        email: data.email,
+                        password: hashPasswordFromBcrypt,
+                        nameUser: data.nameUser,
+                        avatar: data.img
                     })
                 }
+                resolve({
+                    errCode: 0,
+                    errMessage: 'OK'
+                })
             }
-            if (!img.mimetype.startsWith('image/')) {
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let upvideo = (video) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!video) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Only images are allowed!'
+                    errMessage: 'Not have video'
                 })
-            } else {
-                const imageData = img.buffer.toString('base64');
+            }
+            else {
+                const videoData = video.buffer.toString('base64');
                 let rs = ''
-                rs = await cloudinary.uploader.upload(`data:${img.mimetype};base64,${imageData}`)
+                rs = await cloudinary.uploader.upload(`data:${video.mimetype};base64,${videoData}`, { resource_type: 'video' })
                     .then(result => result)
                     .catch(error => {
                         console.log(error)
@@ -230,28 +316,14 @@ let createNewUser = (data, img) => {
                 if (rs === '') {
                     resolve({
                         errCode: 2,
-                        errMessage: 'not upload img'
+                        errMessage: 'not upload content lesson'
                     })
                 } else {
-                    let check = await checkUserEmail(data.email)
-                    if (check === true) {
-                        resolve({
-                            errCode: 1,
-                            errMessage: "email is already in used please try another email!"
-                        })
-                    } else {
-                        let hashPasswordFromBcrypt = await hashUserPassword(data.password)
-                        await db.User.create({
-                            email: data.email,
-                            password: hashPasswordFromBcrypt,
-                            nameUser: data.nameUser,
-                            avatar: rs.secure_url
-                        })
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'OK'
-                        })
-                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'created OK',
+                        video: rs.secure_url
+                    })
                 }
             }
         } catch (error) {
@@ -288,7 +360,7 @@ let deleteUser = (id) => {
             })
             resolve({
                 errCode: 0,
-                message: "delete successfully!"
+                errMessage: "delete successfully!"
             })
         } catch (error) {
             reject(error)
@@ -315,21 +387,123 @@ let updateUserData = (data) => {
                 })
             }
             else {
-                await db.User.update({
-                    nameUser: data.nameUser,
-                }, {
-                    where: { id: data.id }
-                })
-                resolve({
-                    errCode: 0,
-                    message: "update success"
-                })
+                if (data.option === 'name') {
+                    await db.User.update({
+                        nameUser: data.value,
+                    }, {
+                        where: { id: data.id }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: "update name success"
+                    })
+                }
+                if (data.option === 'email') {
+                    let check = await checkUserEmail(data.value)
+                    if (check === true) {
+                        resolve({
+                            errCode: 1,
+                            errMessage: "email exist"
+                        })
+                    } else {
+                        await db.User.update({
+                            email: data.value,
+                        }, {
+                            where: { id: data.id }
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: "update email success"
+                        })
+                    }
+                }
+                if (data.option === 'img') {
+                    await db.User.update({
+                        avatar: data.value,
+                    }, {
+                        where: { id: data.id }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: "update img success"
+                    })
+                }
             }
         } catch (error) {
             reject(error)
         }
     })
 }
+let updateGroupData = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 2,
+                    errMessage: "Missing id update"
+                })
+            }
+            let group = await db.Group.findOne({
+                where: { id: data.id }
+            })
+            if (!group) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "the group not found"
+                })
+            }
+            else {
+                if (data.option === 'name') {
+                    await db.Group.update({
+                        nameGroup: data.value,
+                    }, {
+                        where: { id: data.id }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: "update name group success"
+                    })
+                }
+                if (data.option === 'img') {
+                    await db.Group.update({
+                        avatarGroup: data.value,
+                    }, {
+                        where: { id: data.id }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: "update img group success"
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+let getOnlyAllUser = (currentId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let users = ''
+            users = await db.User.findAll({
+                where: {
+                    id: {
+                        [Op.ne]: currentId // Tìm tất cả các id không bằng userIdToExclude
+                    }
+                },
+                attributes: {
+                    exclude: ['password']
+                },
+                raw: true
+            })
+            resolve(users)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 /**
  * controller refreshToken
@@ -371,6 +545,9 @@ export default {
     updateUserData,
     refreshToken,
     handleUserOffline,
-    handleUserOnline
+    handleUserOnline,
+    getOnlyAllUser,
+    upvideo,
+    updateGroupData
 };
 

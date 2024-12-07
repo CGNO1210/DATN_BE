@@ -4,17 +4,45 @@ import { Sequelize } from 'sequelize';
 let createMessage = (idSend, content, idReceive, isGroup, type) => {
     return new Promise(async (resolve, reject) => {
         try {
-            await db.Message.create({
-                idSend,
-                content,
-                idReceive,
-                isGroup,
-                type
-            })
-            resolve({
-                errCode: 0,
-                errMessage: 'Create message successfully!!'
-            })
+            if (!isGroup) {
+                await db.Message.create({
+                    idSend,
+                    content,
+                    idReceive,
+                    isGroup,
+                    type
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Create message successfully!!'
+                })
+            } else {
+                //create message group
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let createMessageGroup = (idSend, content, idReceive, isGroup, type) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (isGroup) {
+                await db.MessagesGroup.create({
+                    idSend,
+                    content,
+                    idReceive,
+                    isGroup,
+                    type
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Create message group successfully!!'
+                })
+            } else {
+                //create message group
+            }
 
         } catch (error) {
             reject(error)
@@ -33,8 +61,19 @@ let getMessageByUser1AndUser2 = (id1, id2) => {
                     ],
                     isGroup: 0
                 },
-                order: [['createdAt', 'DESC']] // Sắp xếp theo thời gian tạo, có thể sử dụng 'DESC' để sắp xếp giảm dần
+                order: [['createdAt', 'DESC']], // Sắp xếp theo thời gian tạo, có thể sử dụng 'DESC' để sắp xếp giảm dần
+                raw: true
             });
+
+            for (let i = 0; i < messages.length; i++) {
+                let nameUser = await db.User.findOne({
+                    where: {
+                        id: messages[i].idSend
+                    },
+                    raw: true
+                })
+                messages[i].nameSend = nameUser.nameUser
+            }
 
             resolve({
                 errCode: 0,
@@ -50,14 +89,23 @@ let getMessageByGroup = (idGroup) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let messages = await db.Message.findAll({
+            let messages = await db.MessagesGroup.findAll({
                 where: {
                     idReceive: idGroup
                     // isGroup: 1
                 },
-                order: [['createdAt', 'DESC']] // Sắp xếp theo thời gian tạo, có thể sử dụng 'DESC' để sắp xếp giảm dần
+                order: [['createdAt', 'DESC']], // Sắp xếp theo thời gian tạo, có thể sử dụng 'DESC' để sắp xếp giảm dần
+                raw: true
             });
-
+            for (let i = 0; i < messages.length; i++) {
+                let nameUser = await db.User.findOne({
+                    where: {
+                        id: messages[i].idSend
+                    },
+                    raw: true
+                })
+                messages[i].nameSend = nameUser.nameUser
+            }
             resolve({
                 errCode: 0,
                 errMessage: 'get message group successfully!!',
@@ -68,8 +116,35 @@ let getMessageByGroup = (idGroup) => {
         }
     })
 }
+let deleteMessage = (id, isGroup) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (isGroup == 1) {
+                await db.MessagesGroup.destroy({
+                    where: {
+                        id
+                    }
+                })
+            } else {
+                await db.Message.destroy({
+                    where: {
+                        id
+                    }
+                })
+            }
+            resolve({
+                errCode: 0,
+                errMessage: 'delete message group successfully!!',
+            })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 export default {
     createMessage,
     getMessageByUser1AndUser2,
-    getMessageByGroup
+    getMessageByGroup,
+    createMessageGroup,
+    deleteMessage
 }

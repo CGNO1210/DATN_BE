@@ -3,10 +3,10 @@ import http from 'http'
 import bodyParser from 'body-parser';
 // import configViewEngine from './config/viewEngine';
 import initWebRoutes from './routes/web';
-// import setupSocketIO from './config/socketConfig';
 import cors from 'cors';
 import connectDB from './config/connectDB'
 const socketIO = require('socket.io');
+import db from './models/index';
 
 require('dotenv').config();
 
@@ -25,24 +25,51 @@ app.set("view engine", "ejs")
 app.set("views", "./src/views")
 // configViewEngine(app)
 //socket config
-let connectedSockets = []
+// let connectedSockets = []
 io.on('connection', (socket) => {
-    console.log('Người ' + socket.id + ' đã kết nối');
-    socket.chat = 'all'
-    // Lắng nghe sự kiện từ client
-    socket.on('set name', (data) => {
-        socket.userName = data.nameUser
-        socket.idUser = data.id
-        socket.avatar = data.avatar
-        connectedSockets.push(socket)
-        io.emit('all users', getSocketIds());
+
+    socket.on('test', (data) => {
+        socket.to(data.socketId).emit('ontest', data.socketId)
     })
-    socket.on('user send message', (message) => {
-        let userName = socket.userName;
-        if (socket.chat === 'all') {
-            socket.broadcast.emit('user receive message', { message, userName })
+    console.log('Người ' + socket.id + ' đã kết nối');
+
+    socket.on('joinRoom', room => {
+        socket.join(room);
+        io.to(room).emit('message', 'A new user has joined the room');
+    });
+    //sett onl
+    // Lắng nghe sự kiện từ client
+    socket.on('init', async (id) => {
+        // socket.nameUser = data.nameUser
+        if (id) {
+            socket.idUser = id
+            //set onl in db
+            await db.User.update({
+                isOnline: 1,
+                socketId: socket.id
+            }, {
+                where: { id: id }
+            }).then(() => {
+                console.log('id: ', id,);
+                io.emit('online', `${id} online`);
+            }).catch(err => console.log(err))
+        }
+        socket.on('delete', (data) => {
+            io.emit('online', data);
+        })
+
+        //set socketId in db
+        // io.emit('all users', getSocketIds());
+    })
+    socket.on('send message', ({ room, idSend, idReceive, isGroup, message, type, socketId }) => {
+
+        if (!isGroup) {
+            if (socketId) {
+                socket.to(socketId).emit('receive message', { idSend, idReceive, isGroup, message, type })
+                // socket.broadcast.emit('user receive message', { message, userName })
+            }
         } else {
-            socket.to(socket.chat).emit('user receive message', { message, userName })
+            io.to(room).emit('receive message group', { idSend, idReceive, isGroup, message, type })
         }
     })
 
@@ -51,17 +78,23 @@ io.on('connection', (socket) => {
     })
 
     // Xử lý sự kiện khi có người ngắt kết nối
-    socket.on('disconnect', () => {
-        connectedSockets = connectedSockets.filter((s) => s.id !== socket.id);
-        io.emit('all users', getSocketIds());
+    socket.on('disconnect', async () => {
+        // connectedSockets = connectedSockets.filter((s) => s.id !== socket.id);
+        // io.emit('all users', getSocketIds());
         console.log('Người dùng đã ngắt kết nối');
+        //set off
+        if (socket.idUser) {
+            await db.User.update({
+                isOnline: 0,
+                socketId: ''
+            }, {
+                where: { id: socket.idUser }
+            })
+        }
+        io.emit('online', `offline`);
     });
 });
-function getSocketIds() {
-    return connectedSockets.map((socket) => {
-        return { id: socket.id, idUser: socket.idUser ,userName:socket.userName, avatar:socket.avatar}
-    });
-}
+
 //routes
 connectDB()
 initWebRoutes(app)
